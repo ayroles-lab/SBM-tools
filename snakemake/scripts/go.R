@@ -10,7 +10,7 @@ print(paste("Data folder:", snakemake@params["blockDir"]))
 
 print("Running GO analysis")
 go_set = makeEnrichment(block_path = snakemake@params["blockDir"])
-#go_set = makeEnrichment(block_path = "../data/output/SBM/gtex/blockSummary/fdr-1e-3/LUNG")
+#go_set = makeEnrichment(block_path = "cache/blockSummary/fdr-1e-3/LUNG")
 
 print("Writting GO object")
 saveRDS(go_set, file = snakemake@output[["GO"]])

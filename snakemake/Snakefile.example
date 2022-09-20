@@ -10,7 +10,7 @@ rule all:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        expand("../data/output/SBM/gtex/GO/fdr-{fdr}/{tissue}/block_summary.csv", 
+        expand("cache/GO/fdr-{fdr}/{tissue}/block_summary.csv", 
                fdr = config["fdr"], 
                tissue=sample_pfxes)
 
@@ -21,7 +21,7 @@ rule graph:
     input:
         os.path.join(data_dir, '{tissue}.csv')
     output:
-        "../data/output/SBM/gtex/graph/{tissue}.xml.gz"
+        "cache/graph/{tissue}.xml.gz"
     script:
         "scripts/make_network.py"
  
@@ -30,9 +30,9 @@ rule trim:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        "../data/output/SBM/gtex/graph/{tissue}.xml.gz"
+        "cache/graph/{tissue}.xml.gz"
     output:
-        "../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz" 
+        "cache/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz" 
     params:
         fdr = config["fdr"]
     log: 
@@ -45,9 +45,9 @@ rule minSBM:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        "../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz" 
+        "cache/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz" 
     output:
-        "../data/output/SBM/gtex/initialBlock/fdr-{fdr}/{tissue}.dill" 
+        "cache/initialBlock/fdr-{fdr}/{tissue}.dill" 
     log: 
         "logs/intialBlock/fdr-{fdr}/{tissue}.log"
     script:
@@ -58,10 +58,10 @@ rule annealing:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        graph="../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
-        blocks="../data/output/SBM/gtex/initialBlock/fdr-{fdr}/{tissue}.dill"
+        graph="cache/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
+        blocks="cache/initialBlock/fdr-{fdr}/{tissue}.dill"
     output:
-        blocks="../data/output/SBM/gtex/annealedBlock/fdr-{fdr}/{tissue}.dill" 
+        blocks="cache/annealedBlock/fdr-{fdr}/{tissue}.dill" 
     log: 
         "logs/annealedBlock/fdr-{fdr}/{tissue}.log"
     script:
@@ -72,10 +72,10 @@ rule equilibrate:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        graph="../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
-        blocks="../data/output/SBM/gtex/annealedBlock/fdr-{fdr}/{tissue}.dill"
+        graph="cache/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
+        blocks="cache/annealedBlock/fdr-{fdr}/{tissue}.dill"
     output:
-        blocks="../data/output/SBM/gtex/equilibrate/fdr-{fdr}/{tissue}.dill"
+        blocks="cache/equilibrate/fdr-{fdr}/{tissue}.dill"
     log: 
         "logs/equilibrate/fdr-{fdr}/{tissue}.log"
     script:
@@ -86,11 +86,11 @@ rule MCMC:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        graph="../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
-        blocks="../data/output/SBM/gtex/equilibrate/fdr-{fdr}/{tissue}.dill"
+        graph="cache/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
+        blocks="cache/equilibrate/fdr-{fdr}/{tissue}.dill"
     output:
-        blocks="../data/output/SBM/gtex/MCMC/blocks/fdr-{fdr}/{tissue}.dill",
-        hist="../data/output/SBM/gtex/MCMC/hist/fdr-{fdr}/{tissue}.dill"
+        blocks="cache/MCMC/blocks/fdr-{fdr}/{tissue}.dill",
+        hist="cache/MCMC/hist/fdr-{fdr}/{tissue}.dill"
     log: 
         "logs/MCMC/fdr-{fdr}/{tissue}.log"
     script:
@@ -101,14 +101,14 @@ rule exportBlocks:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        graph="../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
-        blocks="../data/output/SBM/gtex/MCMC/blocks/fdr-{fdr}/{tissue}.dill"
+        graph="cache/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
+        blocks="cache/MCMC/blocks/fdr-{fdr}/{tissue}.dill"
     output:
-        blockSummary="../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}/block_summary.csv",
-        blockDF="../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}/gene_block.csv"
+        blockSummary="cache/blockSummary/fdr-{fdr}/{tissue}/block_summary.csv",
+        blockDF="cache/blockSummary/fdr-{fdr}/{tissue}/gene_block.csv"
 
     params:
-        blockDir = "../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}"
+        blockDir = "cache/blockSummary/fdr-{fdr}/{tissue}"
     log: 
         "logs/exportBlocks/fdr-{fdr}/{tissue}.log"
     script:
@@ -119,14 +119,14 @@ rule GO:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        blockSummary="../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}/block_summary.csv",
-        blockDF="../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}/gene_block.csv"
+        blockSummary="cache/blockSummary/fdr-{fdr}/{tissue}/block_summary.csv",
+        blockDF="cache/blockSummary/fdr-{fdr}/{tissue}/gene_block.csv"
     output:
-        GO="../data/output/SBM/gtex/GO/fdr-{fdr}/{tissue}/GO.rds",
-        GOcsv="../data/output/SBM/gtex/GO/fdr-{fdr}/{tissue}/GO.csv",
-        blockSummary="../data/output/SBM/gtex/GO/fdr-{fdr}/{tissue}/block_summary.csv"
+        GO="cache/GO/fdr-{fdr}/{tissue}/GO.rds",
+        GOcsv="cache/GO/fdr-{fdr}/{tissue}/GO.csv",
+        blockSummary="cache/GO/fdr-{fdr}/{tissue}/block_summary.csv"
     params:
-        blockDir = "../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}"
+        blockDir = "cache/blockSummary/fdr-{fdr}/{tissue}"
     log: 
         log="logs/GO/fdr-{fdr}/{tissue}.log"
     script:
