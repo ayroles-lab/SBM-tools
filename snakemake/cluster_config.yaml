@@ -1,0 +1,13 @@
+__default__:
+    account: damelo
+    partition: main
+    nodes: 1
+    qos: 1wk
+    time: 3-00:00:00
+    cores: 1 #Request n cores be allocated per node.
+    chdir: /Genomics/argo/users/damelo/projects/NEX-HS_C-GxE/gtexSBM
+    output: logs/slurm/sbm_gtex-%j.out
+    error: logs/slurm/sbm_gtex-%j.err
+
+
+# snakemake --cluster "sbatch -p {cluster.partition} -N {cluster.nodes} --qos {cluster.qos} -c {cluster.cores} --mem-per-cpu 1gb -e {cluster.error} -o {cluster.output} -t {cluster.time}" --cluster-config cluster_config.yaml --jobs 70 all 

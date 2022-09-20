@@ -1,0 +1,133 @@
+import os
+
+configfile: "config.yaml"
+
+data_dir = '../rawData/'
+sample_fns = os.listdir(data_dir)
+sample_pfxes = list(map(lambda p: p[:p.rfind('.')], sample_fns))
+
+rule all:
+    resources: 
+        tmpdir="/scratch/tmp"
+    input:
+        expand("../data/output/SBM/gtex/GO/fdr-{fdr}/{tissue}/block_summary.csv", 
+               fdr = config["fdr"], 
+               tissue=sample_pfxes)
+
+rule graph:
+    threads: 1
+    resources: 
+        tmpdir="/scratch/tmp"
+    input:
+        os.path.join(data_dir, '{tissue}.csv')
+    output:
+        "../data/output/SBM/gtex/graph/{tissue}.xml.gz"
+    script:
+        "scripts/make_network.py"
+ 
+rule trim:
+    threads: 1
+    resources: 
+        tmpdir="/scratch/tmp"
+    input:
+        "../data/output/SBM/gtex/graph/{tissue}.xml.gz"
+    output:
+        "../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz" 
+    params:
+        fdr = config["fdr"]
+    log: 
+        "logs/trim/fdr-{fdr}/{tissue}.log"
+    script:
+        "scripts/trim_networks.py"
+
+rule minSBM:
+    threads: 4
+    resources: 
+        tmpdir="/scratch/tmp"
+    input:
+        "../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz" 
+    output:
+        "../data/output/SBM/gtex/initialBlock/fdr-{fdr}/{tissue}.dill" 
+    log: 
+        "logs/intialBlock/fdr-{fdr}/{tissue}.log"
+    script:
+        "scripts/make_SBM.py"
+
+rule annealing: 
+    threads: 8
+    resources: 
+        tmpdir="/scratch/tmp"
+    input:
+        graph="../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
+        blocks="../data/output/SBM/gtex/initialBlock/fdr-{fdr}/{tissue}.dill"
+    output:
+        blocks="../data/output/SBM/gtex/annealedBlock/fdr-{fdr}/{tissue}.dill" 
+    log: 
+        "logs/annealedBlock/fdr-{fdr}/{tissue}.log"
+    script:
+        "scripts/annealing_SBM.py"
+
+rule equilibrate:
+    threads: 8
+    resources: 
+        tmpdir="/scratch/tmp"
+    input:
+        graph="../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
+        blocks="../data/output/SBM/gtex/annealedBlock/fdr-{fdr}/{tissue}.dill"
+    output:
+        blocks="../data/output/SBM/gtex/equilibrate/fdr-{fdr}/{tissue}.dill"
+    log: 
+        "logs/equilibrate/fdr-{fdr}/{tissue}.log"
+    script:
+        "scripts/equilibrateMCMC_SBM.py"
+
+rule MCMC:
+    threads: 16
+    resources: 
+        tmpdir="/scratch/tmp"
+    input:
+        graph="../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
+        blocks="../data/output/SBM/gtex/equilibrate/fdr-{fdr}/{tissue}.dill"
+    output:
+        blocks="../data/output/SBM/gtex/MCMC/blocks/fdr-{fdr}/{tissue}.dill",
+        hist="../data/output/SBM/gtex/MCMC/hist/fdr-{fdr}/{tissue}.dill"
+    log: 
+        "logs/MCMC/fdr-{fdr}/{tissue}.log"
+    script:
+        "scripts/MCMC_SBM.py"
+
+rule exportBlocks:
+    threads: 16
+    resources: 
+        tmpdir="/scratch/tmp"
+    input:
+        graph="../data/output/SBM/gtex/trimmed_graph/fdr-{fdr}/{tissue}.xml.gz",
+        blocks="../data/output/SBM/gtex/MCMC/blocks/fdr-{fdr}/{tissue}.dill"
+    output:
+        blockSummary="../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}/block_summary.csv",
+        blockDF="../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}/gene_block.csv"
+
+    params:
+        blockDir = "../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}"
+    log: 
+        "logs/exportBlocks/fdr-{fdr}/{tissue}.log"
+    script:
+        "scripts/exportBlocks.py"
+
+rule GO:
+    threads: 1
+    resources: 
+        tmpdir="/scratch/tmp"
+    input:
+        blockSummary="../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}/block_summary.csv",
+        blockDF="../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}/gene_block.csv"
+    output:
+        GO="../data/output/SBM/gtex/GO/fdr-{fdr}/{tissue}/GO.rds",
+        GOcsv="../data/output/SBM/gtex/GO/fdr-{fdr}/{tissue}/GO.csv",
+        blockSummary="../data/output/SBM/gtex/GO/fdr-{fdr}/{tissue}/block_summary.csv"
+    params:
+        blockDir = "../data/output/SBM/gtex/blockSummary/fdr-{fdr}/{tissue}"
+    log: 
+        log="logs/GO/fdr-{fdr}/{tissue}.log"
+    script:
+        "scripts/go.R"
