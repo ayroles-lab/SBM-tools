@@ -55,9 +55,9 @@ if __name__ == '__main__':
             h[l][B] += 1
 
     logging.info("Starting MCMC...")
-    # Now we collect the marginals for exactly 1000*10 sweeps
+    # Now we collect the marginals for exactly niter*10 sweeps
     S1 = state_min.entropy()
-    mcmc_equilibrate(state_min, force_niter=1000, mcmc_args=dict(niter=10),
+    mcmc_equilibrate(state_min, force_niter=snakemake.params.niter, mcmc_args=dict(niter=10),
                         callback=collect_partitions, verbose=True)
 
     pmode = PartitionModeState(bs, nested=True, converge=True)

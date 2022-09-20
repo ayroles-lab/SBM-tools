@@ -1,5 +1,5 @@
 import os
-os.environ["OMP_NUM_THREADS"] = "4"
+os.environ["OMP_NUM_THREADS"] = "8"
 
 import sys,os
 import logging, traceback

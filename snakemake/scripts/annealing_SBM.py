@@ -48,7 +48,7 @@ if __name__ == '__main__':
     logging.info("Starting annealing...")
     S1 = state_min.entropy()
     mcmc_anneal(state_min, beta_range=(1, 10), niter=1000,
-                mcmc_equilibrate_args=dict(force_niter=10), verbose=True)
+                mcmc_equilibrate_args=dict(force_niter=10), verbose=False)
     S2 = state_min.entropy()
     logging.info("Improvement from annealing: " + str(S2 - S1))
     logging.info("Final entropy after annealing: " + str(state_min.entropy()))

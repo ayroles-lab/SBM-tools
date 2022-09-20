@@ -3,7 +3,11 @@ import os
 configfile: "config.yaml"
 
 data_dir = '../rawData/'
-sample_fns = os.listdir(data_dir)
+sample_fns = []
+for file in os.listdir(data_dir):
+    if file.endswith(".tsv"):
+        sample_fns.append(file)
+print(sample_fns)
 sample_pfxes = list(map(lambda p: p[:p.rfind('.')], sample_fns))
 
 rule all:
@@ -41,7 +45,7 @@ rule trim:
         "scripts/trim_networks.py"
 
 rule minSBM:
-    threads: 4
+    threads: 8
     resources: 
         tmpdir="/scratch/tmp"
     input:
@@ -76,6 +80,8 @@ rule equilibrate:
         blocks="cache/annealedBlock/fdr-{fdr}/{label}.dill"
     output:
         blocks="cache/equilibrate/fdr-{fdr}/{label}.dill"
+    params:
+        wait = 10
     log: 
         "logs/equilibrate/fdr-{fdr}/{label}.log"
     script:
@@ -91,6 +97,8 @@ rule MCMC:
     output:
         blocks="cache/MCMC/blocks/fdr-{fdr}/{label}.dill",
         hist="cache/MCMC/hist/fdr-{fdr}/{label}.dill"
+    params:
+        niter = 10
     log: 
         "logs/MCMC/fdr-{fdr}/{label}.log"
     script:

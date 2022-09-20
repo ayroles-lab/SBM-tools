@@ -48,7 +48,7 @@ if __name__ == '__main__':
     logging.info("Starting MCMC equilibration...")
     S1 = state_min.entropy()
     mcmc_equilibrate(state_min, 
-                     wait=100, mcmc_args=dict(niter=10), verbose=True)
+                     wait=snakemake.params.wait, mcmc_args=dict(niter=10), verbose=False)
     S2 = state_min.entropy()
     logging.info("Improvement from equilibration: " + str(S2 - S1))
     logging.info("Final entropy after equilibration: " + str(state_min.entropy()))
