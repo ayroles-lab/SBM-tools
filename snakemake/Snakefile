@@ -134,7 +134,9 @@ rule GO:
         GOcsv="cache/GO/fdr-{fdr}/{label}/GO.csv",
         blockSummary="cache/GO/fdr-{fdr}/{label}/block_summary.csv"
     params:
-        blockDir = "cache/blockSummary/fdr-{fdr}/{label}"
+        blockDir = "cache/blockSummary/fdr-{fdr}/{label}",
+        orgdb = "org.Hs.eg.db"
+
     log: 
         log="logs/GO/fdr-{fdr}/{label}.log"
     script:

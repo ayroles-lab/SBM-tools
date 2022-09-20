@@ -4,7 +4,12 @@ log4r_info("Starting.")
 print = log4r_info
 
 print("Loading packages and functions")
-snakemake@source("go_functions_gtex.R")
+
+org.db = snakemake@params[["orgdb"]]
+pak::pkg_install(org.db)
+library(org.db, character.only=TRUE)
+
+snakemake@source("go_functions.R")
 
 print(paste("Data folder:", snakemake@params["blockDir"]))
 

@@ -1,11 +1,10 @@
-pak::pkg_install(c("ggrepel", "AnnotationDbi", "org.Hs.eg.db", "clusterProfiler", "ggnewscale", "enrichplot"))
+pak::pkg_install(c("ggrepel", "AnnotationDbi", "clusterProfiler", "ggnewscale", "enrichplot"))
 library(plyr)
 library(cowplot)
 library(ggrepel)
 library(tidyverse)
 
 library(AnnotationDbi)
-library(org.Hs.eg.db)
 library(clusterProfiler)
 library(ggnewscale)
 library(enrichplot)
@@ -53,7 +52,7 @@ getEnrichment = function(block_number = NULL, level = NULL,
   if(type == "clusterProfiler")
     enGo = enrichGO(gene          = x$en$genes,
                     universe      = x$en$background,
-                    OrgDb         = org.Hs.eg.db,
+                    OrgDb         = org.db,
                     keyType = "ENSEMBL",
                     ont           = ont,
                     pAdjustMethod = "BH",
@@ -62,7 +61,7 @@ getEnrichment = function(block_number = NULL, level = NULL,
                     readable      = TRUE)
   else if(type == "group")
     enGo = groupGO(gene    = x$en$genes,
-                   OrgDb   = org.Hs.eg.db,
+                   OrgDb   = org.db,
                    ont = ont,
                    level = go_level,
                    readable = TRUE)
