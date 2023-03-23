@@ -1,5 +1,7 @@
 import os
-os.environ["OMP_NUM_THREADS"] = "8"
+os.environ["OMP_NUM_THREADS"] = '16' # export OMP_NUM_THREADS=4
+os.environ["OPENBLAS_NUM_THREADS"] = '16' # export OPENBLAS_NUM_THREADS=4
+os.environ["NUMEXPR_NUM_THREADS"] = '16' # export NUMEXPR_NUM_THREADS=6
 
 import sys,os
 import logging, traceback
@@ -36,7 +38,6 @@ if __name__ == '__main__':
     g.ep.z_s = g.new_edge_property("double", (2*np.arctanh(corr.a)))
     
     logging.info("Creating nested block model...")
-    #g = GraphView(g, vfilt=lambda v: np.random.uniform(0, 1) > 0.99)
     state_min = minimize_nested_blockmodel_dl(g, init_bs=None,
                                               state_args=dict(recs=[g.ep.z_s],
                                               rec_types=["real-normal"]))
