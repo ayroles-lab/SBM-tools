@@ -136,3 +136,5 @@ dmypy.json
 
 snakemake/.snakemake
 snakemake/cache
+snakemake/Snakefile
+snakemake/test.ipynb
