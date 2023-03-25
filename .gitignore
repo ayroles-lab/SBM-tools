@@ -138,3 +138,5 @@ snakemake/.snakemake
 snakemake/cache
 snakemake/Snakefile
 snakemake/test.ipynb
+rawData/layered/example_1.tsv
+rawData/layered/example_2.tsv
