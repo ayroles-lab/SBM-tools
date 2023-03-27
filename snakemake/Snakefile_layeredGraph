@@ -3,29 +3,26 @@ import os
 configfile: "config.yaml"
 
 data_dir = '../rawData/layered'
-sample_fns = []
-for file in os.listdir(data_dir):
-    if file.endswith(".tsv"):
-        sample_fns.append(file)
-sample_pfxes = list(map(lambda p: p[:p.rfind('.')], sample_fns))
+input_names = next(os.walk(data_dir))[1]
 
 rule all:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        expand("cache/GO/fdr-{fdr}/layeredNetwork/block_summary.csv", 
-               fdr = config["fdr"])
+        expand("cache/GO/fdr-{fdr}/layered/{label}/block_summary.csv", 
+               fdr = config["fdr"], 
+               label = input_names)
 
 rule graph:
     threads: 1
     resources: 
         tmpdir="/scratch/tmp"
     input:
-       data_dir
+        os.path.join(data_dir, '{label}')
     params:
         type = config["type"]
     output:
-        "cache/graph/layeredNetwork.xml.gz"
+        "cache/graph/layered/{label}.xml.gz"
     script:
         "scripts/make_stacked_network.py"
  
@@ -34,14 +31,14 @@ rule trim:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        "cache/graph/layeredNetwork.xml.gz"
+        "cache/graph/layered/{label}.xml.gz"
     output:
-        "cache/trimmed_graph/fdr-{fdr}/layeredNetwork.xml.gz" 
+        "cache/trimmed_graph/fdr-{fdr}/layered/{label}.xml.gz" 
     params:
         fdr = config["fdr"],
         type = config["type"]
     log: 
-        "logs/trim/fdr-{fdr}/layeredNetwork.log"
+        "logs/trim/fdr-{fdr}/layered/{label}.log"
     script:
         "scripts/trim_networks.py"
 
@@ -52,11 +49,11 @@ rule minSBM:
     params:
         type = config["type"]
     input:
-        "cache/trimmed_graph/fdr-{fdr}/layeredNetwork.xml.gz" 
+        "cache/trimmed_graph/fdr-{fdr}/layered/{label}.xml.gz" 
     output:
-        "cache/initialBlock/fdr-{fdr}/layeredNetwork.dill" 
+        "cache/initialBlock/fdr-{fdr}/layered/{label}.dill" 
     log: 
-        "logs/intialBlock/fdr-{fdr}/layeredNetwork.log"
+        "logs/intialBlock/fdr-{fdr}/layered/{label}.log"
     script:
         "scripts/make_SBM.py"
 
@@ -67,12 +64,12 @@ rule annealing:
     params:
         type = config["type"]
     input:
-        graph="cache/trimmed_graph/fdr-{fdr}/layeredNetwork.xml.gz",
-        blocks="cache/initialBlock/fdr-{fdr}/layeredNetwork.dill"
+        graph="cache/trimmed_graph/fdr-{fdr}/layered/{label}.xml.gz",
+        blocks="cache/initialBlock/fdr-{fdr}/layered/{label}.dill"
     output:
-        blocks="cache/annealedBlock/fdr-{fdr}/layeredNetwork.dill" 
+        blocks="cache/annealedBlock/fdr-{fdr}/layered/{label}.dill" 
     log: 
-        "logs/annealedBlock/fdr-{fdr}/layeredNetwork.log"
+        "logs/annealedBlock/fdr-{fdr}/layered/{label}.log"
     script:
         "scripts/annealing_SBM.py"
 
@@ -84,12 +81,12 @@ rule equilibrate:
         type = config["type"],
         wait = 100
     input:
-        graph="cache/trimmed_graph/fdr-{fdr}/layeredNetwork.xml.gz",
-        blocks="cache/annealedBlock/fdr-{fdr}/layeredNetwork.dill"
+        graph="cache/trimmed_graph/fdr-{fdr}/layered/{label}.xml.gz",
+        blocks="cache/annealedBlock/fdr-{fdr}/layered/{label}.dill"
     output:
-        blocks="cache/equilibrate/fdr-{fdr}/layeredNetwork.dill"
+        blocks="cache/equilibrate/fdr-{fdr}/layered/{label}.dill"
     log: 
-        "logs/equilibrate/fdr-{fdr}/layeredNetwork.log"
+        "logs/equilibrate/fdr-{fdr}/layered/{label}.log"
     script:
         "scripts/equilibrateMCMC_SBM.py"
 
@@ -101,13 +98,13 @@ rule MCMC:
         type = config["type"],
         niter = 1000
     input:
-        graph="cache/trimmed_graph/fdr-{fdr}/layeredNetwork.xml.gz",
-        blocks="cache/equilibrate/fdr-{fdr}/layeredNetwork.dill"
+        graph="cache/trimmed_graph/fdr-{fdr}/layered/{label}.xml.gz",
+        blocks="cache/equilibrate/fdr-{fdr}/layered/{label}.dill"
     output:
-        blocks="cache/MCMC/blocks/fdr-{fdr}/layeredNetwork.dill",
-        hist="cache/MCMC/hist/fdr-{fdr}/layeredNetwork.dill"
+        blocks="cache/MCMC/blocks/fdr-{fdr}/layered/{label}.dill",
+        hist="cache/MCMC/hist/fdr-{fdr}/layered/{label}.dill"
     log: 
-        "logs/MCMC/fdr-{fdr}/layeredNetwork.log"
+        "logs/MCMC/fdr-{fdr}/layered/{label}.log"
     script:
         "scripts/MCMC_SBM.py"
 
@@ -116,16 +113,16 @@ rule exportBlocks:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        graph="cache/trimmed_graph/fdr-{fdr}/layeredNetwork.xml.gz",
-        blocks="cache/MCMC/blocks/fdr-{fdr}/layeredNetwork.dill"
+        graph="cache/trimmed_graph/fdr-{fdr}/layered/{label}.xml.gz",
+        blocks="cache/MCMC/blocks/fdr-{fdr}/layered/{label}.dill"
     output:
-        blockSummary="cache/blockSummary/fdr-{fdr}/layeredNetwork/block_summary.csv",
-        blockDF="cache/blockSummary/fdr-{fdr}/layeredNetwork/gene_block.csv"
+        blockSummary="cache/blockSummary/fdr-{fdr}/layered/{label}/block_summary.csv",
+        blockDF="cache/blockSummary/fdr-{fdr}/layered/{label}/gene_block.csv"
     params:
         type = config["type"],
-        blockDir = "cache/blockSummary/fdr-{fdr}/layeredNetwork"
+        blockDir = "cache/blockSummary/fdr-{fdr}/layered/{label}"
     log: 
-        "logs/exportBlocks/fdr-{fdr}/layeredNetwork.log"
+        "logs/exportBlocks/fdr-{fdr}/layered/{label}.log"
     script:
         "scripts/exportBlocks.py"
 
@@ -134,16 +131,16 @@ rule GO:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        blockSummary="cache/blockSummary/fdr-{fdr}/layeredNetwork/block_summary.csv",
-        blockDF="cache/blockSummary/fdr-{fdr}/layeredNetwork/gene_block.csv"
+        blockSummary="cache/blockSummary/fdr-{fdr}/layered/{label}/block_summary.csv",
+        blockDF="cache/blockSummary/fdr-{fdr}/layered/{label}/gene_block.csv"
     output:
-        GO="cache/GO/fdr-{fdr}/layeredNetwork/GO.rds",
-        GOcsv="cache/GO/fdr-{fdr}/layeredNetwork/GO.csv",
-        blockSummary="cache/GO/fdr-{fdr}/layeredNetwork/block_summary.csv"
+        GO="cache/GO/fdr-{fdr}/layered/{label}/GO.rds",
+        GOcsv="cache/GO/fdr-{fdr}/layered/{label}/GO.csv",
+        blockSummary="cache/GO/fdr-{fdr}/layered/{label}/block_summary.csv"
     params:
-        blockDir = "cache/blockSummary/fdr-{fdr}/layeredNetwork",
+        blockDir = "cache/blockSummary/fdr-{fdr}/layered/{label}",
         orgdb = "org.Hs.eg.db"
     log: 
-        log="logs/GO/fdr-{fdr}/layeredNetwork.log"
+        log="logs/GO/fdr-{fdr}/layered/{label}.log"
     script:
         "scripts/go.R"
