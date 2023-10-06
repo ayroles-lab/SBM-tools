@@ -81,7 +81,7 @@ rule equilibrate:
     output:
         blocks="cache/equilibrate/fdr-{fdr}/{label}.dill"
     params:
-        wait = 10
+        wait = 100
     log: 
         "logs/equilibrate/fdr-{fdr}/{label}.log"
     script:
@@ -98,7 +98,7 @@ rule MCMC:
         blocks="cache/MCMC/blocks/fdr-{fdr}/{label}.dill",
         hist="cache/MCMC/hist/fdr-{fdr}/{label}.dill"
     params:
-        niter = 10
+        niter = 1000
     log: 
         "logs/MCMC/fdr-{fdr}/{label}.log"
     script:
@@ -135,7 +135,7 @@ rule GO:
         blockSummary="cache/GO/fdr-{fdr}/{label}/block_summary.csv"
     params:
         blockDir = "cache/blockSummary/fdr-{fdr}/{label}",
-        orgdb = "org.Hs.eg.db"
+        orgdb = "org.Dm.eg.db"
 
     log: 
         log="logs/GO/fdr-{fdr}/{label}.log"
