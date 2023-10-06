@@ -9,9 +9,13 @@ rule all:
     resources: 
         tmpdir="/scratch/tmp"
     input:
-        expand("cache/GO/fdr-{fdr}/layered/{label}/block_summary.csv", 
+        expand("cache/MCMC/blocks/fdr-{fdr}/layered/{label}.dill", 
                fdr = config["fdr"], 
                label = input_names)
+    # input:
+    #     expand("cache/GO/fdr-{fdr}/layered/{label}/block_summary.csv", 
+    #            fdr = config["fdr"], 
+    #            label = input_names)
 
 rule graph:
     threads: 1
@@ -23,6 +27,8 @@ rule graph:
         type = config["type"]
     output:
         "cache/graph/layered/{label}.xml.gz"
+    log: 
+        "logs/graph/layered/{label}.log"
     script:
         "scripts/make_stacked_network.py"
  
@@ -112,6 +118,8 @@ rule exportBlocks:
     threads: 16
     resources: 
         tmpdir="/scratch/tmp"
+    params:
+        type = config["type"]
     input:
         graph="cache/trimmed_graph/fdr-{fdr}/layered/{label}.xml.gz",
         blocks="cache/MCMC/blocks/fdr-{fdr}/layered/{label}.dill"

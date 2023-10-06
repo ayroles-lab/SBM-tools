@@ -1,3 +1,3 @@
-fdr: [1e-3]
+fdr: [1e-3, 1e-4]
 #fdr: [1e-2,1e-3,1e-4]
 type: "layer" # "layer" or "batch"
