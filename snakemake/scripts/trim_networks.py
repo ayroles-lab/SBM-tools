@@ -94,6 +94,10 @@ if __name__ == '__main__':
     logging.info("Density: " + str(density))
     logging.info("Min correlation: " + str(min(gi.edge_properties["spearman"].a)))
     logging.info("Max correlation: " + str(max(gi.edge_properties["spearman"].a)))
+    
+    logging.info("Adding z-transformed weights...")
+    spearman = gi.edge_properties["spearman"]
+    gi.edge_properties["z_s"] = gi.new_edge_property("double", (2*np.arctanh(spearman.a)))
 
     logging.info("Writting trimmed graph...")
     gi.save(snakemake.output[0])

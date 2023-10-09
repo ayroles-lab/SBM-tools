@@ -38,7 +38,8 @@ rule trim:
     output:
         "cache/trimmed_graph/fdr-{fdr}/{label}.xml.gz" 
     params:
-        fdr = config["fdr"]
+        fdr = config["fdr"],
+        type = config["type"]
     log: 
         "logs/trim/fdr-{fdr}/{label}.log"
     script:
@@ -50,6 +51,8 @@ rule minSBM:
         tmpdir="/scratch/tmp"
     input:
         "cache/trimmed_graph/fdr-{fdr}/{label}.xml.gz" 
+    params:
+        type = config["type"]
     output:
         "cache/initialBlock/fdr-{fdr}/{label}.dill" 
     log: 
@@ -61,6 +64,8 @@ rule annealing:
     threads: 8
     resources: 
         tmpdir="/scratch/tmp"
+    params:
+        type = config["type"]
     input:
         graph="cache/trimmed_graph/fdr-{fdr}/{label}.xml.gz",
         blocks="cache/initialBlock/fdr-{fdr}/{label}.dill"
@@ -81,6 +86,7 @@ rule equilibrate:
     output:
         blocks="cache/equilibrate/fdr-{fdr}/{label}.dill"
     params:
+        type = config["type"],
         wait = 100
     log: 
         "logs/equilibrate/fdr-{fdr}/{label}.log"
@@ -98,6 +104,7 @@ rule MCMC:
         blocks="cache/MCMC/blocks/fdr-{fdr}/{label}.dill",
         hist="cache/MCMC/hist/fdr-{fdr}/{label}.dill"
     params:
+        type = config["type"],
         niter = 1000
     log: 
         "logs/MCMC/fdr-{fdr}/{label}.log"
@@ -116,6 +123,7 @@ rule exportBlocks:
         blockDF="cache/blockSummary/fdr-{fdr}/{label}/gene_block.csv"
 
     params:
+        type = config["type"],
         blockDir = "cache/blockSummary/fdr-{fdr}/{label}"
     log: 
         "logs/exportBlocks/fdr-{fdr}/{label}.log"
