@@ -6,8 +6,8 @@ __default__:
     time: 30-00:00:00
     cores: 8 #Request n cores be allocated per node.
     mem: 12gb
-    chdir: /Genomics/ayroleslab2/diogro/projects/TCGA-LayeredSBM/SBM/snakemake
-    output: logs/slurm/sbm_gtex-%j.out
-    error: logs/slurm/sbm_gtex-%j.err
+    chdir: # working directory
+    output: logs/slurm/sbm-%j.out
+    error: logs/slurm/sbm-%j.err
 
 # snakemake --cluster "sbatch -p {cluster.partition} -N {cluster.nodes} --qos {cluster.qos} -c {cluster.cores} --mem-per-cpu {cluster.mem} -e {cluster.error} -o {cluster.output} -t {cluster.time}" --cluster-config cluster_config.yaml --jobs 70 all 
