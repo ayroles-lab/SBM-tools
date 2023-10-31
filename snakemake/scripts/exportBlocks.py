@@ -37,7 +37,7 @@ def ensure_dir(file_path):
 
 def get_group(x, state):
     levels = state.get_levels()
-    n_levels = 7#len(levels)
+    n_levels = len(levels)
     r = np.zeros(n_levels)
     r[0] = levels[0].get_blocks()[x]
     for i in range(1, n_levels):
