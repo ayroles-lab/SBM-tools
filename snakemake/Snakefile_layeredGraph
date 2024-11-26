@@ -152,3 +152,10 @@ rule GO:
         log="logs/GO/fdr-{fdr}/layered/{label}.log"
     script:
         "scripts/go.R"
+
+rule:
+   input:
+	file=file.txt
+   output:
+	out=out.txt
+
