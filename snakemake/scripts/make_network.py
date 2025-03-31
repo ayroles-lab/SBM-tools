@@ -30,5 +30,6 @@ if __name__ == '__main__':
 
     g.edge_properties["pvalue"] = pval
     g.edge_properties["spearman"] = spearman
+    g.edge_properties["z_s"] = g.new_edge_property("double", (2*np.arctanh(g.ep.spearman.a)))  
 
     g.save(snakemake.output[0])

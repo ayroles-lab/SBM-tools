@@ -12,7 +12,7 @@ sample_pfxes = list(map(lambda p: p[:p.rfind('.')], sample_fns))
 
 rule all:
     resources: 
-        tmpdir="/scratch/tmp"
+        tmpdir="/tmp"
     input:
         expand("cache/GO/fdr-{fdr}/{label}/block_summary.csv", 
                fdr = config["fdr"], 
@@ -21,7 +21,7 @@ rule all:
 rule graph:
     threads: 1
     resources: 
-        tmpdir="/scratch/tmp"
+        tmpdir="/tmp"
     input:
         os.path.join(data_dir, '{label}.tsv')
     output:
@@ -32,7 +32,7 @@ rule graph:
 rule trim:
     threads: 1
     resources: 
-        tmpdir="/scratch/tmp"
+        tmpdir="/tmp"
     input:
         "cache/graph/{label}.xml.gz"
     output:
@@ -48,7 +48,7 @@ rule trim:
 rule minSBM:
     threads: 8
     resources: 
-        tmpdir="/scratch/tmp"
+        tmpdir="/tmp"
     input:
         "cache/trimmed_graph/fdr-{fdr}/{label}.xml.gz" 
     params:
@@ -63,7 +63,7 @@ rule minSBM:
 rule annealing: 
     threads: 8
     resources: 
-        tmpdir="/scratch/tmp"
+        tmpdir="/tmp"
     params:
         type = config["type"]
     input:
@@ -79,7 +79,7 @@ rule annealing:
 rule equilibrate:
     threads: 8
     resources: 
-        tmpdir="/scratch/tmp"
+        tmpdir="/tmp"
     input:
         graph="cache/trimmed_graph/fdr-{fdr}/{label}.xml.gz",
         blocks="cache/annealedBlock/fdr-{fdr}/{label}.dill"
@@ -96,7 +96,7 @@ rule equilibrate:
 rule MCMC:
     threads: 16
     resources: 
-        tmpdir="/scratch/tmp"
+        tmpdir="/tmp"
     input:
         graph="cache/trimmed_graph/fdr-{fdr}/{label}.xml.gz",
         blocks="cache/equilibrate/fdr-{fdr}/{label}.dill"
@@ -114,7 +114,7 @@ rule MCMC:
 rule exportBlocks:
     threads: 16
     resources: 
-        tmpdir="/scratch/tmp"
+        tmpdir="/tmp"
     input:
         graph="cache/trimmed_graph/fdr-{fdr}/{label}.xml.gz",
         blocks="cache/MCMC/blocks/fdr-{fdr}/{label}.dill"
@@ -133,7 +133,7 @@ rule exportBlocks:
 rule GO:
     threads: 1
     resources: 
-        tmpdir="/scratch/tmp"
+        tmpdir="/tmp"
     input:
         blockSummary="cache/blockSummary/fdr-{fdr}/{label}/block_summary.csv",
         blockDF="cache/blockSummary/fdr-{fdr}/{label}/gene_block.csv"

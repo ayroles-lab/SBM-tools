@@ -35,18 +35,19 @@ if __name__ == '__main__':
     logging.info("Loading blocks...")
     with open (snakemake.input.blocks, "rb") as fh:
         bs = dill.load(fh)
-    
+    bs[0] = g.own_property(bs[0])
+
     logging.info("Creating nested block model...")
     if snakemake.params.type == "layer": 
-        state_min = minimize_nested_blockmodel_dl(g, init_bs=bs,
-                                                  state_args=dict(base_type=LayeredBlockState,
-                                                                  ec=g.ep.layer, layers=True,
-                                                                  recs=[g.ep.z_s], 
-                                                                  rec_types=["real-normal"]))
+        state_min = NestedBlockState(g, bs=bs,
+                                     state_args=dict(base_type=LayeredBlockState,
+                                      ec=g.ep.layer, layers=True,
+                                      recs=[g.ep.z_s], 
+                                      rec_types=["real-normal"]))
     elif snakemake.params.type == "batch":
-        state_min = minimize_nested_blockmodel_dl(g, init_bs=bs,
-                                                  state_args=dict(recs=[g.ep.z_s],
-                                                                  rec_types=["real-normal"]))
+        state_min = NestedBlockState(g, bs=bs,
+                                     state_args=dict(recs=[g.ep.z_s],
+                                                     rec_types=["real-normal"]))
     else: 
         sys.exit('Parameter "type" is not batch or layer')
 

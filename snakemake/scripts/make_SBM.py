@@ -37,13 +37,14 @@ if __name__ == '__main__':
     if snakemake.params.type == "layer": 
         state_min = minimize_nested_blockmodel_dl(g, init_bs=None,
                                                   state_args=dict(base_type=LayeredBlockState,
-                                                                  ec=g.ep.layer, layers=True,
-                                                                  recs=[g.ep.z_s], 
-                                                                  rec_types=["real-normal"]))
+                                                   ec=g.ep.layer, layers=True,
+                                                   recs=[g.ep.z_s], 
+                                                   rec_types=["real-normal"]))
     elif snakemake.params.type == "batch":
         state_min = minimize_nested_blockmodel_dl(g, init_bs=None,
-                                                  state_args=dict(recs=[g.ep.z_s],
-                                                                  rec_types=["real-normal"]))
+                                                  state_args=dict
+                                                  (recs=[g.ep.z_s],
+                                                   rec_types=["real-normal"]))
     else: 
         sys.exit('Parameter "type" is not batch or layer')
                                                     

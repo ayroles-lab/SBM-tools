@@ -143,3 +143,5 @@ rawData/layered/example_2.tsv
 rawData/batch/*.tsv
 snakemake/logs/slurm/*.err
 snakemake/logs/slurm/*.out
+.DS_Store
+debuggin.ipynb
