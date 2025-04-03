@@ -1,4 +1,4 @@
-#pak::pkg_install(c("ggrepel", "AnnotationDbi", "clusterProfiler", "ggnewscale", "enrichplot"))
+#pak::pkg_install(c("ggrepel", "AnnotationDbi", "clusterProfiler", "ggnewscale", "enrichplot", "org.Dm.eg.db", "org.Hs.eg.db"))
 library(plyr)
 library(cowplot)
 library(ggrepel)

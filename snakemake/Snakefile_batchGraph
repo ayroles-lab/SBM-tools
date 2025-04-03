@@ -143,7 +143,7 @@ rule GO:
         blockSummary="cache/GO/fdr-{fdr}/{label}/block_summary.csv"
     params:
         blockDir = "cache/blockSummary/fdr-{fdr}/{label}",
-        orgdb = "org.Dm.eg.db"
+        orgdb = "org.Hs.eg.db"
 
     log: 
         log="logs/GO/fdr-{fdr}/{label}.log"
